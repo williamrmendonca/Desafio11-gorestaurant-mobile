@@ -53,22 +53,27 @@ const Dashboard: React.FC = () => {
 
   const navigation = useNavigation();
 
-  async function handleNavigateToFoodDetail(id: number): Promise<void> {
-    navigation.navigate('FoodDetails', { id });
+  async function handleNavigate(id: number): Promise<void> {
+    navigation.navigate('FoodDetails', {
+      id,
+    });
   }
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      const response = await api.get<Omit<Food, 'formattedPrice'>[]>('foods', {
-        params: { id: selectedCategory, name: searchValue || undefined },
+      const response = await api.get('/foods', {
+        params: {
+          category_like: selectedCategory,
+          name_like: searchValue,
+        },
       });
 
-      const data = response.data.map(food => ({
-        ...food,
-        formattedPrice: formatValue(food.price),
-      }));
-
-      setFoods(data);
+      setFoods(
+        response.data.map((food: Food) => ({
+          ...food,
+          formattedPrice: formatValue(food.price),
+        })),
+      );
     }
 
     loadFoods();
@@ -76,29 +81,20 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadCategories(): Promise<void> {
-      api.get('categories').then(response => {
-        setCategories(response.data);
-      });
+      const response = await api.get('/categories');
+
+      setCategories(response.data);
     }
 
     loadCategories();
   }, []);
 
   function handleSelectCategory(id: number): void {
-    // Select / deselect category
-    if (!selectedCategory) {
-      setSelectedCategory(id);
-      return;
-    }
-
     if (selectedCategory === id) {
       setSelectedCategory(undefined);
-      return;
+    } else {
+      setSelectedCategory(id);
     }
-
-    setSelectedCategory(id);
-
-    // setSelectedCategory(state => (state && state === id ? undefined : id));
   }
 
   return (
@@ -152,7 +148,7 @@ const Dashboard: React.FC = () => {
             {foods.map(food => (
               <Food
                 key={food.id}
-                onPress={() => handleNavigateToFoodDetail(food.id)}
+                onPress={() => handleNavigate(food.id)}
                 activeOpacity={0.6}
                 testID={`food-${food.id}`}
               >

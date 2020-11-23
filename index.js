@@ -1,7 +1,6 @@
-require('react-native').unstable_enableLogBox();
-
-import 'intl';
-import 'intl/locale-data/jsonp/pt-BR';
+/**
+ * @format
+ */
 
 import {AppRegistry} from 'react-native';
 import App from './src';
